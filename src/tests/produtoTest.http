@@ -1,5 +1,7 @@
 GET http://localhost:3000/api/produtos
+###
 
+GET http://localhost:3000/api/produtos/3
 ###
 
 POST http://localhost:3000/api/produtos
@@ -7,6 +9,17 @@ Content-Type: application/json
 
 {
     "nome": "Café cuado",
-    "preco": "2.50",
-    "estoque": 20
+    "preco": 2.50,
+    "estoque": 0
 }
+###
+
+PATCH http://localhost:3000/api/produtos/1
+Content-Type: application/json
+
+{
+    "nome": "Café cuado"
+}
+###
+DELETE http://localhost:3000/api/produtos/3
+###

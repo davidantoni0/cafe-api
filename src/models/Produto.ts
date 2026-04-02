@@ -17,5 +17,24 @@ export const ProdutoModel = {
         const values = [dados.nome, dados.preco, dados.estoque];
         const result = await pool.query(query, values);
         return result.rows[0]
+    },
+
+    async buscarPorId(id:Number): Promise<IProduto| null>{
+        const query = "SELECT *FROM produtos WHERE id = $1";
+        const {rows} = await pool.query(query, [id]);
+        return rows[0] || null;
+    },
+
+    async atualizar(id:Number, dados: Partial<IProduto>): Promise<IProduto | null>{
+        const query = "UPDATE produtos SET nome = $1, preco = $2, estoque = $3 WHERE id = $4 Returning *";
+        const values = [dados.nome, dados.preco, dados.estoque, id];
+        const result = await pool.query(query, values);
+        return result.rows[0] ||null;
+    },
+
+    async delete(id:Number): Promise <boolean>{
+        const result = await pool.query("DELETE FROM produtos WHERE id =$1", [id]);
+        return (result.rowCount ?? 0) > 0
     }
+
 }
