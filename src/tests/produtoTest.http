@@ -10,7 +10,7 @@ Content-Type: application/json
 {
     "nome": "Café cuado",
     "preco": 2.50,
-    "estoque": 0
+    "estoque": 30
 }
 ###
 
