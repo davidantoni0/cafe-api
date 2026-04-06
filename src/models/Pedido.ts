@@ -87,7 +87,7 @@ export const PedidoModel = {
         const listaDePedidos : IPedido[] = []
 
         for (const row of rows){
-            let pedidoExistente = listaDePedidos.find(p=>p.id === row.pedido_id);
+            let pedidoExistente = listaDePedidos.find((p) =>p.id === row.pedido_id);
             if(!pedidoExistente){
                 pedidoExistente = {
                 id: row.pedido_id,
@@ -95,8 +95,8 @@ export const PedidoModel = {
                 status: row.status,
                 itens: []
                 }
+                listaDePedidos.push(pedidoExistente)
             }
-            listaDePedidos.push(pedidoExistente)
             if(row.item_id){
                 pedidoExistente.itens.push({
                     id: row.item_id,
