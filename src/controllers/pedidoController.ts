@@ -1,6 +1,18 @@
 import { PedidoModel, type INovoItemPedido } from "../models/Pedido.js"
 import type {Request, Response} from "express"
 
+export const  getPedidos = async(req: Request, res: Response) =>{
+    try {
+        const listaPedidos = await PedidoModel.listarTodos();
+        res.status(200).json(listaPedidos);
+    }catch (error: unknown){
+        if (error instanceof Error){
+            return res.status(400). json({error: error.message});
+        }
+        return res.status(500).json({error: "Ocorreu um erro inesperado ao listar os pedidos."})
+        
+    }
+ }
 
 export const postPedido = async (req: Request, res: Response) =>{
     const itens: INovoItemPedido[] = req.body.itens;

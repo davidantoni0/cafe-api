@@ -5,7 +5,7 @@ import { error } from "node:console";
 export const getProdutos = async (req: Request, res: Response) => {
     try {
         const produtos = await ProdutoModel.listarTodos();
-        res.json(produtos);
+        res.status(200).json(produtos);
     }catch {
         res.status(500).json({error: "Erro ao buscar produtos =("})
     }

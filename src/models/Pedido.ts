@@ -1,3 +1,4 @@
+import type { promises } from "node:dns";
 import { pool } from "../db.js";
 
 
@@ -15,6 +16,17 @@ export interface IPedido{
     data_criacao:Date;
     status: string;
     itens: IItemPedido[]
+}
+
+export interface IPedidoRow{
+    pedido_id: number;
+    data_criacao: Date;
+    status:string;
+    item_id: number | null;
+    produto_id: number | null;
+    quantidade: number | null;
+    produto_nome: string | null;
+    produto_preco: number | null
 }
 
 export type INovoItemPedido = Pick<IItemPedido, "produto_id" | "quantidade">;// type é o mesmo que interface, mais usado quando for digitar em uma única linha
@@ -63,6 +75,42 @@ export const PedidoModel = {
         } finally{
             client.release();
         }
+    },
+
+    async listarTodos(): Promise<IPedido[]>{
+        const query = `SELECT 
+        p.id AS pedido_id, p.data_criacao, p.status, ip.id as item_id, ip.quantidade, pr.nome AS produto_nome, pr.preco as produto_preco FROM pedidos p 
+        LEFT JOIN itens_pedido ip ON p.id = ip.pedido_id 
+        LEFT JOIN  produtos pr ON ip.produto_id = pr.id
+        ORDER BY p.data_criacao DESC`;
+        const {rows} = await pool.query<IPedidoRow>(query);
+        const listaDePedidos : IPedido[] = []
+
+        for (const row of rows){
+            let pedidoExistente = listaDePedidos.find(p=>p.id === row.pedido_id);
+            if(!pedidoExistente){
+                pedidoExistente = {
+                id: row.pedido_id,
+                data_criacao: row.data_criacao,
+                status: row.status,
+                itens: []
+                }
+            }
+            listaDePedidos.push(pedidoExistente)
+            if(row.item_id){
+                pedidoExistente.itens.push({
+                    id: row.item_id,
+                    produto_id : row.produto_id!,
+                    pedido_id : row.pedido_id!,
+                    quantidade: row.quantidade!,
+                    preco_un: row.produto_preco!
+
+                });
+            }
+        }
+        return listaDePedidos
+
     }
+
 }
 
