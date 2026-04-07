@@ -79,7 +79,7 @@ export const PedidoModel = {
 
     async listarTodos(): Promise<IPedido[]>{
         const query = `SELECT 
-        p.id AS pedido_id, p.data_criacao, p.status, ip.id as item_id, ip.quantidade, pr.nome AS produto_nome, pr.preco as produto_preco FROM pedidos p 
+        p.id AS pedido_id, p.data_criacao, p.status, ip.id as item_id, ip.quantidade, pr.nome AS produto_nome,ip.produto_id, pr.preco as produto_preco FROM pedidos p 
         LEFT JOIN itens_pedido ip ON p.id = ip.pedido_id 
         LEFT JOIN  produtos pr ON ip.produto_id = pr.id
         ORDER BY p.data_criacao DESC`;
@@ -110,7 +110,38 @@ export const PedidoModel = {
         }
         return listaDePedidos
 
+    },
+
+    async deletar(id: number): Promise<boolean>{
+        const client = await pool.connect();
+
+        try {
+            await client.query("BEGIN");
+            const queryItems = 
+            "SELECT produto_id, quantidade FROM itens_pedido WHERE pedido_id = $1";
+            const {rows} = await client.query(queryItems, [id]);
+            for (const row of rows){
+                await client.query(
+                    "UPDATE produtos SET estoque = estoque + $1 WHERE id = $2",
+                    [row.quantidade, row.produto_id]);
+            }
+            const result = await client.query("DELETE FROM pedidos WHERE id =$1", [id]);
+            await client.query(
+                "COMMIT");
+
+            return (result.rowCount ?? 0) > 0
+
+        } catch (error) {
+            await client.query(
+                "ROLLBACK");
+
+            throw error
+        } finally{
+            client.release();
+        }
     }
+
+    //async MudarStatus()
 
 }
 

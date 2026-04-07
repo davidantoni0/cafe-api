@@ -12,7 +12,7 @@ export const  getPedidos = async(req: Request, res: Response) =>{
         return res.status(500).json({error: "Ocorreu um erro inesperado ao listar os pedidos."})
         
     }
- }
+}
 
 export const postPedido = async (req: Request, res: Response) =>{
     const itens: INovoItemPedido[] = req.body.itens;
@@ -31,5 +31,22 @@ export const postPedido = async (req: Request, res: Response) =>{
         return res.status(500).json({error: "Ocorreu um erro inesperado ao processar o pedido."})
         
     }
+}
 
+export const deletePedido = async (req: Request, res: Response) =>{
+    const id =  Number(req.params.id)
+    try {
+        const sucesso = await PedidoModel.deletar(id);
+        if(!sucesso){
+            return res.status(404).json({ error: "Pedido não encontrado"})
+        }
+        res.status(204).send;
+        
+    } catch (error: unknown) {
+        if (error instanceof Error){
+            return res.status(400). json({error: error.message});
+        }
+        return res.status(500).json({error: "Ocorreu um erro inesperado ao processar o pedido."})
+        
+    }
 }
