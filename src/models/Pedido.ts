@@ -7,6 +7,7 @@ export interface IItemPedido{
     pedido_id:number;
     produto_id: number;
     quantidade: number;
+    nome: string;
     preco_un: number
     
 }
@@ -103,6 +104,7 @@ export const PedidoModel = {
                     produto_id : row.produto_id!,
                     pedido_id : row.pedido_id!,
                     quantidade: row.quantidade!,
+                    nome: row.produto_nome!,
                     preco_un: row.produto_preco!
 
                 });
@@ -139,9 +141,13 @@ export const PedidoModel = {
         } finally{
             client.release();
         }
-    }
+    },
 
-    //async MudarStatus()
-
+    async mudarStatus(id: number, novoStatus: string): Promise<boolean> {
+        const query = "UPDATE pedidos SET status = $1 WHERE id = $2";
+        const result = await pool.query(query, [novoStatus, id]);
+        return (result.rowCount ?? 0) > 0;
+    },
+    
 }
 

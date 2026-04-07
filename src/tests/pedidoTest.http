@@ -25,3 +25,12 @@ GET http://localhost:3000/api/pedidos
 ###
 
 DELETE http://localhost:3000/api/pedidos/8
+
+###
+
+PATCH  http://localhost:3000/api/pedidos/2
+Content-Type: application/json
+
+{
+    "status": "finalizado"
+}

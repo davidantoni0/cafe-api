@@ -41,12 +41,33 @@ export const deletePedido = async (req: Request, res: Response) =>{
             return res.status(404).json({ error: "Pedido não encontrado"})
         }
         res.status(204).send;
-        
+
     } catch (error: unknown) {
         if (error instanceof Error){
             return res.status(400). json({error: error.message});
         }
-        return res.status(500).json({error: "Ocorreu um erro inesperado ao processar o pedido."})
-        
+        return res.status(500).json({error: "Ocorreu um erro inesperado ao processar o pedido."})    
     }
 }
+
+export const patchStatus = async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    const { status } = req.body;
+    if (!status) {
+      res.status(400).json({ error: "O novo status deve ser informado" });
+    }
+    try {
+      const sucesso = await PedidoModel.mudarStatus(id, status);
+      if (!sucesso) {
+        return res.status(404).json({ error: "Pedido não encontrado." });
+      }
+      return res.json({ message: "Status atualizado com sucesso!" });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return res.status(400).json({ error: error.message });
+      }
+      return res
+        .status(500)
+        .json({ error: "Ocorreu um erro inesperado ao atualizar o status." });
+    }
+  };
