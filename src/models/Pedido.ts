@@ -148,6 +148,68 @@ export const PedidoModel = {
         const result = await pool.query(query, [novoStatus, id]);
         return (result.rowCount ?? 0) > 0;
     },
+
+    async atualizarPedido(id: number, novoItem: INovoItemPedido[]): Promise<boolean> {
+        const client = await pool.connect();
     
+        try {
+            await client.query("BEGIN");
+    
+            const { rows: itensAntigos } = await client.query(
+                "SELECT produto_id, quantidade FROM itens_pedido WHERE pedido_id = $1",
+                [id]);
+    
+            if (itensAntigos.length === 0) {
+                throw new Error("Pedido não encontrado ou sem itens");
+            }
+    
+            for (const item of itensAntigos) {
+                await client.query(
+                    "UPDATE produtos SET estoque = estoque + $1 WHERE id = $2",
+                    [item.quantidade, item.produto_id]);
+            }
+    
+            await client.query(
+                "DELETE FROM itens_pedido WHERE pedido_id = $1",
+                [id]);
+    
+
+            for (const item of novoItem) {
+
+                const { rows: produto } = await client.query(
+                    "SELECT estoque, nome, preco FROM produtos WHERE id = $1",
+                    [item.produto_id]);
+                    console.log(produto)
+                if (!produto[0]) {
+                    throw new Error("Produto não encontrado");
+                }
+    
+                if (produto[0].estoque < item.quantidade) {
+                    throw new Error(`Estoque insuficiente para o produto ${item.produto_id}`);
+                }
+    
+                await client.query(
+                    "UPDATE produtos SET estoque = estoque - $1 WHERE id = $2",
+                    [item.quantidade, item.produto_id]);
+    
+                await client.query(
+                    "INSERT INTO itens_pedido (pedido_id, produto_id, quantidade, preco_un) VALUES ($1, $2, $3, $4)",
+                    [id, item.produto_id, item.quantidade, produto[0].preco]);
+            }
+    
+            await client.query("COMMIT");
+            return true;
+    
+        } catch (error) {
+            await client.query("ROLLBACK");
+            throw error;
+    
+        } finally {
+            client.release();
+        }
+    },
+
 }
+    
+
 
