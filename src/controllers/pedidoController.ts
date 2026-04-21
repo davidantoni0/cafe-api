@@ -94,7 +94,7 @@ export const getTotalFaturamento = async (req: Request, res: Response) => {
     try {
         const faturamentoTotal = await PedidoModel.getFaturamentoTotal();
         return res.status(200).json({faturamentoTotal: faturamentoTotal});
-    } catch (error) {
+    } catch (error: unknown) {
         if (error instanceof Error) {
             return res.status(400).json({ error: error.message });
         }
@@ -111,8 +111,12 @@ export const patchCancelarPedido = async (req: Request, res: Response) => {
             return res.status(404).json({ error: "Pedido não encontrado ou não pode ser cancelado." });
         }
         return res.json({ message: "Pedido cancelado com sucesso!" });
-    } catch (error) {
+    } catch (error: unknown) {
         if (error instanceof Error) {
+            if (error.message === "Pedido não encontrado") {
+                return res.status(404).json({ error: error.message });
+            }
+
             return res.status(400).json({ error: error.message });
         }
         return res.status(500).json({ error: "Ocorreu um erro inesperado ao cancelar o pedido." });

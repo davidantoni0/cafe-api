@@ -1,0 +1,19 @@
+
+GET http://localhost:3000/api/pedidos/faturamentos
+###
+
+PATCH http://localhost:3000/api/pedidos/3/cancelar
+###
+
+PATCH http://localhost:3000/api/pedidos/999/cancelar
+###
+
+PATCH http://localhost:3000/api/pedidos/2/cancelar
+###
+
+
+/*Crie um arquivo chamado exercicios.http na raiz do projeto contendo os seguintes testes:
+Uma chamada para o novo relatório financeiro.
+Uma chamada para cancelar um pedido existente.
+Uma chamada de tentativa de cancelamento de um pedido que não existe (deve retornar 404).
+Uma chamada de tentativa de cancelamento de um pedido que já está finalizado (deve retornar 400).*/
