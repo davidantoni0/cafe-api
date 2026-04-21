@@ -209,6 +209,15 @@ export const PedidoModel = {
         }
     },
 
+    async getFaturamentoTotal(): Promise<number> {
+        const query = `SELECT SUM(ip.quantidade * ip.preco_un) AS faturamento_total
+        FROM pedidos p
+        JOIN itens_pedido ip ON p.id = ip.pedido_id
+        WHERE p.status = 'finalizado'`;
+        const { rows } = await pool.query<{ faturamento_total: number }>(query);
+        return rows[0]?.faturamento_total ?? 0;
+    }
+
 }
     
 

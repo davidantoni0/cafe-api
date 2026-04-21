@@ -12,7 +12,7 @@ export const  getPedidos = async(req: Request, res: Response) =>{
         return res.status(500).json({error: "Ocorreu um erro inesperado ao listar os pedidos."})
         
     }
-}
+};
 
 export const postPedido = async (req: Request, res: Response) =>{
     const itens: INovoItemPedido[] = req.body.itens;
@@ -31,7 +31,7 @@ export const postPedido = async (req: Request, res: Response) =>{
         return res.status(500).json({error: "Ocorreu um erro inesperado ao processar o pedido."})
         
     }
-}
+};
 
 export const deletePedido = async (req: Request, res: Response) =>{
     const id =  Number(req.params.id)
@@ -48,7 +48,7 @@ export const deletePedido = async (req: Request, res: Response) =>{
         }
         return res.status(500).json({error: "Ocorreu um erro inesperado ao processar o pedido."})    
     }
-}
+};
 
 export const patchStatus = async (req: Request, res: Response) => {
     const id = Number(req.params.id);
@@ -68,7 +68,7 @@ export const patchStatus = async (req: Request, res: Response) => {
         }
         return res.status(500).json({ error: "Ocorreu um erro inesperado ao atualizar o status." });
         }
-  }
+};
 
 export const updatePedido = async (req: Request, res: Response) => {
     const id = Number(req.params.id);
@@ -88,4 +88,17 @@ export const updatePedido = async (req: Request, res: Response) => {
         }
         return res.status(500).json({ error: "Ocorreu um erro inesperado ao atualizar o pedido." });
         }
+};
+
+export const getTotalFaturamento = async (req: Request, res: Response) => {
+    try {
+        const faturamentoTotal = await PedidoModel.getFaturamentoTotal();
+        return res.status(200).json({faturamentoTotal: faturamentoTotal});
+    } catch (error) {
+        if (error instanceof Error) {
+            return res.status(400).json({ error: error.message });
+        }
+        return res.status(500).json({ error: "Ocorreu um erro inesperado ao calcular o faturamento total." });
+        
+    }
 }
