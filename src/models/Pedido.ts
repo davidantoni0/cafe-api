@@ -216,8 +216,57 @@ export const PedidoModel = {
         WHERE p.status = 'finalizado'`;
         const { rows } = await pool.query<{ faturamento_total: number }>(query);
         return rows[0]?.faturamento_total ?? 0;
-    }
+    },
+    /*Objetivo: Garantir a integridade dos dados através de Transações SQL em um fluxo de cancelamento.
+Enunciado:
+Implementar a funcionalidade de cancelamento de pedidos através do endpoint PATCH /api/pedidos/:id/cancelar. Ao cancelar um pedido, o sistema deve garantir que os produtos retornem ao estoque.
+Requisitos Técnicos:
+Validação de Estado: Um pedido só pode ser cancelado se o seu status atual for 'pendente'. Se for 'finalizado' ou já estiver 'cancelado', a API deve retornar erro 400.
+Uso de Transação (ACID): Toda a operação deve ocorrer dentro de um bloco BEGIN / COMMIT.
+Fluxo da Transação:
+Alterar o status do pedido para 'cancelado'.
+Recuperar todos os itens pertencentes a este pedido (ID do produto e quantidade).
+Para cada item, realizar o estorno no estoque: UPDATE produtos SET estoque = estoque + quantidade WHERE id = produto_id.
+Tratamento de Erro: Caso qualquer passo falhe, aplique o ROLLBACK. */
 
+    async cancelPedido(id: number): Promise<boolean>{
+            const client = await pool.connect();
+            try {
+                await client.query("BEGIN");
+                const { rows: pedido } = await client.query(
+                    "SELECT status FROM pedidos WHERE id = $1",
+                    [id]
+                );
+                if (pedido.length === 0) {
+                    throw new Error("Pedido não encontrado");
+                }
+                if (pedido[0].status !== "pendente") {
+                    throw new Error("Somente pedidos pendentes podem ser cancelados");
+                }
+                await client.query(
+                    "UPDATE pedidos SET status = 'cancelado' WHERE id = $1",
+                    [id]
+                );
+                const { rows: itens } = await client.query(
+                    "SELECT produto_id, quantidade FROM itens_pedido WHERE pedido_id = $1",
+                    [id]
+                );
+                for (const item of itens) {
+                    await client.query(
+                        "UPDATE produtos SET estoque = estoque + $1 WHERE id = $2",
+                        [item.quantidade, item.produto_id]
+                    );
+                }
+                await client.query("COMMIT");
+                return true;
+
+            } catch (error) {
+                await client.query("ROLLBACK");
+            throw error;
+            } finally {
+                client.release();
+            }
+    }
 }
     
 

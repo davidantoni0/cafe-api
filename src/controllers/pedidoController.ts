@@ -101,4 +101,20 @@ export const getTotalFaturamento = async (req: Request, res: Response) => {
         return res.status(500).json({ error: "Ocorreu um erro inesperado ao calcular o faturamento total." });
         
     }
+};
+
+export const patchCancelarPedido = async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    try {
+        const sucesso = await PedidoModel.cancelPedido(id);
+        if (!sucesso) {
+            return res.status(404).json({ error: "Pedido não encontrado ou não pode ser cancelado." });
+        }
+        return res.json({ message: "Pedido cancelado com sucesso!" });
+    } catch (error) {
+        if (error instanceof Error) {
+            return res.status(400).json({ error: error.message });
+        }
+        return res.status(500).json({ error: "Ocorreu um erro inesperado ao cancelar o pedido." });
+    }
 }

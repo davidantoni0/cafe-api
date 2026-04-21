@@ -60,3 +60,7 @@ Content-Type: application/json
 ###
 
 GET http://localhost:3000/api/pedidos/faturamentos
+
+###
+
+PATCH http://localhost:3000/api/pedidos/3/cancelar
