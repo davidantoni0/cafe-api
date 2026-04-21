@@ -217,18 +217,7 @@ export const PedidoModel = {
         const { rows } = await pool.query<{ faturamento_total: number }>(query);
         return rows[0]?.faturamento_total ?? 0;
     },
-    /*Objetivo: Garantir a integridade dos dados através de Transações SQL em um fluxo de cancelamento.
-Enunciado:
-Implementar a funcionalidade de cancelamento de pedidos através do endpoint PATCH /api/pedidos/:id/cancelar. Ao cancelar um pedido, o sistema deve garantir que os produtos retornem ao estoque.
-Requisitos Técnicos:
-Validação de Estado: Um pedido só pode ser cancelado se o seu status atual for 'pendente'. Se for 'finalizado' ou já estiver 'cancelado', a API deve retornar erro 400.
-Uso de Transação (ACID): Toda a operação deve ocorrer dentro de um bloco BEGIN / COMMIT.
-Fluxo da Transação:
-Alterar o status do pedido para 'cancelado'.
-Recuperar todos os itens pertencentes a este pedido (ID do produto e quantidade).
-Para cada item, realizar o estorno no estoque: UPDATE produtos SET estoque = estoque + quantidade WHERE id = produto_id.
-Tratamento de Erro: Caso qualquer passo falhe, aplique o ROLLBACK. */
-
+    
     async cancelPedido(id: number): Promise<boolean>{
             const client = await pool.connect();
             try {
